@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %} 小飞侠的网站{% endblock %}
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'home.css'  %}">
+    <script src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+{% endblock %}
+{% block nav_home_active %}active{% endblock %}
+{% block content %}
+    <!-- 图表容器 DOM -->
+    <h3 class="home-content">欢迎来到我的主页，随便看看</h3>
+    <div id="container"></div>
+    <div class="hot-blog">
+        <h3>今日热门点击</h3>
+        <ul>
+            {% for today_hot_data in today_hot_datas %}
+                <li>
+                    <a href="{% url 'blog_detail' today_hot_data.content_object.pk %}">
+                    {{ today_hot_data.content_object.title }} ({{ today_hot_data.reader_num }})
+                    </a>
+                </li>
+            {% empty %}
+                暂无热门博客
+            {% endfor %}
+
+        </ul>
+    </div>
+    <div class="hot-blog">
+        <h3>七日热门点击</h3>
+        <ul>
+            {% for sevenday_hot_data in get_week_hot_data %}
+                <li>
+                    <a href="{% url 'blog_detail' sevenday_hot_data.id %}">
+                    {{ sevenday_hot_data.title }} ({{ sevenday_hot_data.read_num_sum }})
+                    </a>
+                </li>
+            {% empty %}
+                暂无热门博客
+            {% endfor %}
+        </ul>
+    </div>
+    <script>
+        // 图表配置
+        var options = {
+            chart: {type: 'line' },                         //指定图表的类型，默认是折线图（line）
+            title: {text: '一个星期内的每天浏览量' },                // 标题
+            xAxis: {
+                categories: {{ dates|safe }},
+                tickmarkPlacement:'on',
+            },  // x 轴分类
+            yAxis: {
+                title: {text: null  },             // y 轴标题
+                labels:{enable:false},
+                gridLineDashStyle:'Dash',
+            },
+            series: [{                              // 数据列
+                name: '阅读量',                        // 数据列名
+                data: {{ read_nums }}                     // 数据
+            }],
+            plotOptions:{
+              line:{
+                  dataLabels:{
+                      enable:true
+                  }
+              }
+            },
+            legend:{enable: false},
+            credits:{enable:false},
+        };
+        // 图表初始化函数
+        var chart = Highcharts.chart('container', options);
+    </script>
+
+{% endblock %}
